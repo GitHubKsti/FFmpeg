@@ -47,6 +47,10 @@
 #include "pixdesc.h"
 #include "pixfmt.h"
 
+#ifndef CreateMutexEx
+#define CreateMutexEx(lpMutexAttributes, lpName, dwFlags, dwDesiredAccess) CreateMutex(lpMutexAttributes, lpName, dwFlags)
+#endif
+
 typedef HRESULT(WINAPI *PFN_CREATE_DXGI_FACTORY)(REFIID riid, void **ppFactory);
 
 static AVOnce functions_loaded = AV_ONCE_INIT;
@@ -421,7 +425,7 @@ static int d3d11va_device_init(AVHWDeviceContext *hwdev)
     HRESULT hr;
 
     if (!device_hwctx->lock) {
-        device_hwctx->lock_ctx = CreateMutex(NULL, 0, NULL);
+        device_hwctx->lock_ctx = CreateMutexEx(NULL, 0, NULL, 0);
         if (device_hwctx->lock_ctx == INVALID_HANDLE_VALUE) {
             av_log(NULL, AV_LOG_ERROR, "Failed to create a mutex\n");
             return AVERROR(EINVAL);
