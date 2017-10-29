@@ -412,20 +412,15 @@ static int mediacodec_dec_parse_format(AVCodecContext *avctx, MediaCodecDecConte
     }
 
     /* Optional fields */
-    if (ff_AMediaFormat_getInt32(s->format, "crop-top", &value))
-        s->crop_top = value;
+    if (ff_AMediaFormat_getInt32(s->format, "crop-top", &s->crop_top) && ff_AMediaFormat_getInt32(s->format, "crop-bottom", &s->crop_bottom))
+        height = s->crop_bottom + 1 - s->crop_top;
+    else
+        height = s->height;
 
-    if (ff_AMediaFormat_getInt32(s->format, "crop-bottom", &value))
-        s->crop_bottom = value;
-
-    if (ff_AMediaFormat_getInt32(s->format, "crop-left", &value))
-        s->crop_left = value;
-
-    if (ff_AMediaFormat_getInt32(s->format, "crop-right", &value))
-        s->crop_right = value;
-
-    width = s->crop_right + 1 - s->crop_left;
-    height = s->crop_bottom + 1 - s->crop_top;
+    if (ff_AMediaFormat_getInt32(s->format, "crop-left", &s->crop_left) && ff_AMediaFormat_getInt32(s->format, "crop-right", &s->crop_right))
+        width = s->crop_right + 1 - s->crop_left;
+    else
+        width = s->width;
 
     av_log(avctx, AV_LOG_INFO,
         "Output crop parameters top=%d bottom=%d left=%d right=%d, "
