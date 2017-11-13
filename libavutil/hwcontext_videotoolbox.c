@@ -36,6 +36,7 @@ static const struct {
     uint32_t cv_fmt;
     enum AVPixelFormat pix_fmt;
 } cv_pix_fmts[] = {
+    { kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange, AV_PIX_FMT_P010 },
     { kCVPixelFormatType_420YpCbCr8Planar,              AV_PIX_FMT_YUV420P },
     { kCVPixelFormatType_422YpCbCr8,                    AV_PIX_FMT_UYVY422 },
     { kCVPixelFormatType_32BGRA,                        AV_PIX_FMT_BGRA },
