@@ -1414,6 +1414,8 @@ static int parse_packet(AVFormatContext *s, AVPacket *pkt, int stream_index)
         compute_pkt_fields(s, st, st->parser, pkt, AV_NOPTS_VALUE, AV_NOPTS_VALUE);
     }
 
+    int64_t last_pts = AV_NOPTS_VALUE;
+
     while (size > 0 || (pkt == &flush_pkt && got_output)) {
         int len;
         int64_t next_pts = pkt->pts;
@@ -1472,6 +1474,17 @@ static int parse_packet(AVFormatContext *s, AVPacket *pkt, int stream_index)
             out_pkt.flags |= AV_PKT_FLAG_KEY;
 
         compute_pkt_fields(s, st, st->parser, &out_pkt, next_dts, next_pts);
+
+        /* FIXME: This is an incredibly ugly hack to interpolate timestamps
+        * for AAC_LATM audio tracks where the parser fails to do this
+        * correctly.
+        * The worst about this, is the hardcoded pts delta, which will be
+        * wrong for most streams */
+        if (out_pkt.pts == AV_NOPTS_VALUE && last_pts != AV_NOPTS_VALUE &&
+            st->codecpar->codec_id == AV_CODEC_ID_AAC_LATM)
+                out_pkt.pts = last_pts + 3840;
+ 
+        last_pts = out_pkt.pts;
 
         ret = add_to_pktbuf(&s->internal->parse_queue, &out_pkt,
                             &s->internal->parse_queue_end, 1);
