@@ -2772,7 +2772,8 @@ static int mpegts_read_packet(AVFormatContext *s, AVPacket *pkt)
 
     pkt->size = -1;
     ts->pkt = pkt;
-    ret = handle_packets(ts, 0);
+    int64_t maxPackets = s->probesize/ts->raw_packet_size;
+    ret = handle_packets(ts, maxPackets);
     if (ret < 0) {
         av_packet_unref(ts->pkt);
         /* flush pes data left */
